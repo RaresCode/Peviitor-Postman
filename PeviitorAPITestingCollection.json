@@ -1,0 +1,493 @@
+{
+	"info": {
+		"_postman_id": "64db0355-484d-4b1a-b00c-bb9de4aa3577",
+		"name": "peviitor",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25847669"
+	},
+	"item": [
+		{
+			"name": "Upload Jobs",
+			"item": [
+				{
+					"name": "Jobs Uploader",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Parse the response JSON\r",
+									"var jsonData = pm.response.json();\r",
+									"\r",
+									"// Define the variables for fresh scraped data\r",
+									"var job_titles = []\r",
+									"var job_cities = []\r",
+									"var job_counties = []\r",
+									"var job_links = []\r",
+									"var job_remote = []\r",
+									"\r",
+									"// Check if 'succes' is defined and is an array\r",
+									"if (jsonData.succes && Array.isArray(jsonData.succes)) {\r",
+									"    // Iterate over each numeric key in the 'succes' array\r",
+									"    Object.keys(jsonData.succes).forEach(function(key) {\r",
+									"        // Access the job details for the current iteration\r",
+									"        var currentJobTitle = jsonData.succes[key].job_title;\r",
+									"        var currentJobCities = jsonData.succes[key].city;\r",
+									"        var currentJobCounties = jsonData.succes[key].county;\r",
+									"        var currentJoblinks = jsonData.succes[key].job_link;\r",
+									"        var currentJobremote = jsonData.succes[key].remote;\r",
+									"\r",
+									"        // Check if cities are already a list\r",
+									"        if (Array.isArray(currentJobCities)) {\r",
+									"            job_cities.push(currentJobCities)\r",
+									"            job_counties.push(currentJobCounties)\r",
+									"        } else {\r",
+									"            job_cities.push([currentJobCities])\r",
+									"            job_counties.push([currentJobCounties])\r",
+									"        }\r",
+									"        // Push other details to lists\r",
+									"        job_titles.push(currentJobTitle)\r",
+									"        job_links.push(currentJoblinks)\r",
+									"        job_remote.push(currentJobremote)\r",
+									"\r",
+									"    });\r",
+									"} else {\r",
+									"    console.log(\"No valid 'succes' array found in the response.\");\r",
+									"}\r",
+									"\r",
+									"// Save values to a env variables\r",
+									"pm.environment.set(\"job_titles\", job_titles);\r",
+									"pm.environment.set(\"job_cities\", JSON.stringify(job_cities));\r",
+									"pm.environment.set(\"job_counties\", JSON.stringify(job_counties));\r",
+									"pm.environment.set(\"job_links\", job_links);\r",
+									"pm.environment.set(\"job_remote\", job_remote);\r",
+									"\r",
+									"const company = pm.variables.replaceIn(\"{{company}}\");\r",
+									"\r",
+									"pm.test(`${company} scrapers-ui response status code is 200`, function () {\r",
+									"    pm.expect(pm.response.code).to.equal(200);\r",
+									"});\r",
+									"pm.test(`${company} scrapers-ui body matches string`, function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"Total\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "authority",
+								"value": "dev.laurentiumarian.ro"
+							},
+							{
+								"key": "accept",
+								"value": "*/*"
+							},
+							{
+								"key": "accept-language",
+								"value": "en-US,en;q=0.5"
+							},
+							{
+								"key": "content-type",
+								"value": "application/json"
+							},
+							{
+								"key": "origin",
+								"value": "https://scrapers.peviitor.ro"
+							},
+							{
+								"key": "referer",
+								"value": "https://scrapers.peviitor.ro/"
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-ch-ua-platform",
+								"value": "\"Windows\""
+							},
+							{
+								"key": "sec-fetch-dest",
+								"value": "empty"
+							},
+							{
+								"key": "sec-fetch-mode",
+								"value": "cors"
+							},
+							{
+								"key": "sec-fetch-site",
+								"value": "cross-site"
+							},
+							{
+								"key": "sec-gpc",
+								"value": "1"
+							},
+							{
+								"key": "user-agent",
+								"value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"file\": \"{{scraper}}\",\r\n    \"url\": \"https://dev.laurentiumarian.ro/scraper/JobsScrapers/\",\r\n    \"dataSetUrl\": \"https://dev.laurentiumarian.ro/dataset/JobsScrapers/{{scraper}}/\"\r\n}\r\n"
+						},
+						"url": {
+							"raw": "{{scrapers-ui-link}}",
+							"host": [
+								"{{scrapers-ui-link}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test Jobs",
+			"item": [
+				{
+					"name": "Search Jobs",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Set the initial page number\r",
+									"pm.environment.set('page', 1);\r",
+									"\r",
+									"// Initialize an array to store all results\r",
+									"pm.environment.set('allResults', []);\r",
+									"\r",
+									"function makeRequest() {\r",
+									"    // Construct the URL with parameters\r",
+									"    let apiUrl = pm.variables.get('peviitor-api-link');\r",
+									"    let queryString = `?q=${pm.variables.replaceIn(\"{{company}}\")}&country=Rom%C3%A2nia&page=${pm.environment.get('page')}`;\r",
+									"    let fullUrl = `${apiUrl}${queryString}`;\r",
+									"\r",
+									"    // Make the API request\r",
+									"    pm.sendRequest({\r",
+									"        url: fullUrl,\r",
+									"        method: 'GET',\r",
+									"        header: pm.request.headers.toObject()\r",
+									"    }, function (err, response) {\r",
+									"        // Handle the response\r",
+									"        if (response.code === 200) {\r",
+									"            // Parse the JSON response\r",
+									"            let jsonResponse = response.json();\r",
+									"            let results = jsonResponse.response.docs;\r",
+									"\r",
+									"            if (results.length > 0) {\r",
+									"                // Append the results to the array\r",
+									"                let currentResults = pm.environment.get('allResults');\r",
+									"                currentResults = currentResults.concat(results);\r",
+									"                pm.environment.set('allResults', currentResults);\r",
+									"\r",
+									"                // Increment the page for the next request\r",
+									"                pm.environment.set('page', pm.environment.get('page') + 1);\r",
+									"\r",
+									"                // Make the next request\r",
+									"                makeRequest();\r",
+									"            } else {\r",
+									"                // No more results, end the recursion\r",
+									"                console.log('No more results');\r",
+									"            }\r",
+									"        } else {\r",
+									"            // Handle the error\r",
+									"            console.error('Error:', response.code, response.body);\r",
+									"        }\r",
+									"    });\r",
+									"}\r",
+									"\r",
+									"// Start the initial request\r",
+									"makeRequest();\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "authority",
+								"value": "api.peviitor.ro"
+							},
+							{
+								"key": "accept",
+								"value": "*/*"
+							},
+							{
+								"key": "accept-language",
+								"value": "en-US,en;q=0.5"
+							},
+							{
+								"key": "origin",
+								"value": "https://peviitor.ro"
+							},
+							{
+								"key": "referer",
+								"value": "https://peviitor.ro/"
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-fetch-dest",
+								"value": "empty"
+							},
+							{
+								"key": "sec-fetch-mode",
+								"value": "cors"
+							},
+							{
+								"key": "sec-fetch-site",
+								"value": "same-site"
+							},
+							{
+								"key": "sec-gpc",
+								"value": "1"
+							}
+						],
+						"url": {
+							"raw": "{{peviitor-api-link}}?q={{company}}&country=Rom%C3%A2nia&page={{page}}",
+							"host": [
+								"{{peviitor-api-link}}"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{company}}"
+								},
+								{
+									"key": "country",
+									"value": "Rom%C3%A2nia"
+								},
+								{
+									"key": "page",
+									"value": "{{page}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Jobs API",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"// Retrieve the results from the environment variable\r",
+									"let testResults = pm.environment.get('allResults');\r",
+									"\r",
+									"// Define the lists for the results from the api result\r",
+									"api_job_titles = []\r",
+									"api_job_cities = []\r",
+									"api_job_counties = []\r",
+									"api_job_links = []\r",
+									"api_job_remote = []\r",
+									"\r",
+									"\r",
+									"// Loop through each item in the array\r",
+									"for (var i = 0; i < testResults.length; i++) {\r",
+									"\r",
+									"    api_job_titles.push(testResults[i]['job_title'][0])\r",
+									"    api_job_cities.push(testResults[i]['city'])\r",
+									"    api_job_counties.push(testResults[i]['county'])\r",
+									"    api_job_links.push(testResults[i]['job_link'][0])\r",
+									"    api_job_remote.push(testResults[i]['remote'][0])\r",
+									"}\r",
+									"\r",
+									"const company = pm.variables.replaceIn(\"{{company}}\");\r",
+									"\r",
+									"// Scraper title jobs to match API title jobs\r",
+									"pm.test(`${company} scraper title jobs to match ${company} API title jobs`, function () {\r",
+									"    pm.expect(api_job_titles.sort()).to.eql(pm.environment.get('job_titles').sort());\r",
+									"    pm.expect(api_job_titles.length).to.eql(pm.environment.get('job_titles').length);\r",
+									"});\r",
+									"\r",
+									"// Scraper city jobs to match API city jobs\r",
+									"pm.test(`${company} scraper city jobs to match ${company} API city jobs`, function () {\r",
+									"    pm.expect(api_job_cities.sort()).to.eql(JSON.parse(pm.environment.get('job_cities')).sort());\r",
+									"    pm.expect(api_job_cities.length).to.eql(JSON.parse(pm.environment.get('job_cities')).length);\r",
+									"});\r",
+									"\r",
+									"// Scraper counties jobs to match API counties jobs\r",
+									"pm.test(`${company} scraper counties jobs to match ${company} API counties jobs`, function () {\r",
+									"    pm.expect(api_job_counties.sort()).to.eql(JSON.parse(pm.environment.get('job_counties')).sort());\r",
+									"    pm.expect(api_job_counties.length).to.eql(JSON.parse(pm.environment.get('job_counties')).length);\r",
+									"});\r",
+									"\r",
+									"// Scraper links jobs to match API links jobs\r",
+									"pm.test(`${company} scraper links jobs to match ${company} API links jobs`, function () {\r",
+									"    pm.expect(api_job_links.sort()).to.eql(pm.environment.get('job_links').sort());\r",
+									"    pm.expect(api_job_links.length).to.eql(pm.environment.get('job_links').length);\r",
+									"});\r",
+									"\r",
+									"// Scraper remote jobs to match API remote jobs\r",
+									"pm.test(`${company} scraper remote jobs to match ${company} API remote jobs`, function () {\r",
+									"    pm.expect(api_job_remote.sort()).to.eql(pm.environment.get('job_remote').sort());\r",
+									"    pm.expect(api_job_remote.length).to.eql(pm.environment.get('job_remote').length);\r",
+									"});\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"\r",
+									"// Tests on response after itteration\r",
+									"pm.test(`${company} peviitor response status code is 200`, function () {\r",
+									"    pm.expect(pm.response.code).to.equal(200);\r",
+									"});\r",
+									"pm.test(`${company} peviitor verify that the responseHeader object is present`, function () {\r",
+									"  const responseData = pm.response.json();\r",
+									"  \r",
+									"  pm.expect(responseData).to.be.an('object');\r",
+									"  pm.expect(responseData.responseHeader).to.exist;\r",
+									"});\r",
+									"pm.test(`${company} peviitor verify that the 'response' object is present in the response`, function () {\r",
+									"    const responseData = pm.response.json();\r",
+									"    pm.expect(responseData).to.have.property('response');\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "authority",
+								"value": "api.peviitor.ro"
+							},
+							{
+								"key": "accept",
+								"value": "*/*"
+							},
+							{
+								"key": "accept-language",
+								"value": "en-US,en;q=0.5"
+							},
+							{
+								"key": "origin",
+								"value": "https://peviitor.ro"
+							},
+							{
+								"key": "referer",
+								"value": "https://peviitor.ro/"
+							},
+							{
+								"key": "sec-ch-ua-mobile",
+								"value": "?0"
+							},
+							{
+								"key": "sec-fetch-dest",
+								"value": "empty"
+							},
+							{
+								"key": "sec-fetch-mode",
+								"value": "cors"
+							},
+							{
+								"key": "sec-fetch-site",
+								"value": "same-site"
+							},
+							{
+								"key": "sec-gpc",
+								"value": "1"
+							}
+						],
+						"url": {
+							"raw": "{{peviitor-api-link}}?q={{company}}&country=Rom%C3%A2nia&page={{page}}",
+							"host": [
+								"{{peviitor-api-link}}"
+							],
+							"query": [
+								{
+									"key": "q",
+									"value": "{{company}}"
+								},
+								{
+									"key": "country",
+									"value": "Rom%C3%A2nia"
+								},
+								{
+									"key": "page",
+									"value": "{{page}}"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "scrapers-ui-link",
+			"value": "https://dev.laurentiumarian.ro/scraper/JobsScrapers/",
+			"type": "string"
+		},
+		{
+			"key": "peviitor-api-link",
+			"value": "https://api.peviitor.ro/v3/search/",
+			"type": "string"
+		}
+	]
+}

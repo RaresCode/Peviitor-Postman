@@ -22,9 +22,9 @@ The project incorporates the following key features:
 
 https://github.com/RaresCode/Peviitor-Postman/assets/91252395/808771f8-ab6e-473e-8c19-46a3dfe60270
 
-
-  
 ### Newman Test Run
+
+https://github.com/RaresCode/Peviitor-Postman/assets/91252395/05c40662-eb22-401b-89f1-9ff0d36e3c46
 
 ### Newman HTML Report 
 

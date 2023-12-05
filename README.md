@@ -19,17 +19,12 @@ The project incorporates the following key features:
 
 ### Collection Runner Test Run
 
-
-
-### Collection JSON Test Report
-
-
-
+  
 ### Newman Test Run
-
 
 ### Newman HTML Report 
 
+![newman](https://github.com/RaresCode/Peviitor-Postman/assets/91252395/8e9ff728-9409-40d7-bbc7-9874b4c9dd3d)
 
 
 ## Setup
